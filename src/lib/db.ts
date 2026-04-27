@@ -241,6 +241,72 @@ function initializeDb(db: Database.Database) {
       FOREIGN KEY (product_id) REFERENCES products(id)
     );
 
+    CREATE TABLE IF NOT EXISTS credit_notes (
+      id TEXT PRIMARY KEY,
+      credit_note_code TEXT UNIQUE,
+      invoice_id TEXT,
+      customer_id TEXT NOT NULL,
+      credit_date TEXT NOT NULL,
+      reference_no TEXT,
+      reason TEXT,
+      subtotal REAL DEFAULT 0,
+      tax_total REAL DEFAULT 0,
+      grand_total REAL DEFAULT 0,
+      status TEXT DEFAULT 'draft',
+      notes TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (invoice_id) REFERENCES invoices(id),
+      FOREIGN KEY (customer_id) REFERENCES customers(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS credit_note_items (
+      id TEXT PRIMARY KEY,
+      credit_note_id TEXT NOT NULL,
+      product_id TEXT,
+      description TEXT,
+      quantity REAL NOT NULL DEFAULT 1,
+      rate REAL NOT NULL DEFAULT 0,
+      tax_rate REAL DEFAULT 0,
+      amount REAL NOT NULL DEFAULT 0,
+      sort_order INTEGER DEFAULT 0,
+      FOREIGN KEY (credit_note_id) REFERENCES credit_notes(id) ON DELETE CASCADE,
+      FOREIGN KEY (product_id) REFERENCES products(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS debit_notes (
+      id TEXT PRIMARY KEY,
+      debit_note_code TEXT UNIQUE,
+      bill_id TEXT,
+      supplier_id TEXT NOT NULL,
+      debit_date TEXT NOT NULL,
+      reference_no TEXT,
+      reason TEXT,
+      subtotal REAL DEFAULT 0,
+      tax_total REAL DEFAULT 0,
+      grand_total REAL DEFAULT 0,
+      status TEXT DEFAULT 'draft',
+      notes TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (bill_id) REFERENCES bills(id),
+      FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS debit_note_items (
+      id TEXT PRIMARY KEY,
+      debit_note_id TEXT NOT NULL,
+      product_id TEXT,
+      description TEXT,
+      quantity REAL NOT NULL DEFAULT 1,
+      rate REAL NOT NULL DEFAULT 0,
+      tax_rate REAL DEFAULT 0,
+      amount REAL NOT NULL DEFAULT 0,
+      sort_order INTEGER DEFAULT 0,
+      FOREIGN KEY (debit_note_id) REFERENCES debit_notes(id) ON DELETE CASCADE,
+      FOREIGN KEY (product_id) REFERENCES products(id)
+    );
+
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       username TEXT NOT NULL UNIQUE,

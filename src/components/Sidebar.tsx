@@ -32,6 +32,7 @@ const navItems: NavItem[] = [
     ),
     children: [
       { href: "/invoices", label: "Invoices" },
+      { href: "/credit-notes", label: "Credit Notes" },
       { href: "/customers", label: "Customers" },
       { href: "/payments", label: "Payments" },
     ],
@@ -46,6 +47,7 @@ const navItems: NavItem[] = [
     ),
     children: [
       { href: "/purchase/bills", label: "Bills" },
+      { href: "/purchase/debit-notes", label: "Debit Notes" },
       { href: "/purchase/suppliers", label: "Suppliers" },
     ],
   },
