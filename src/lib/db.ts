@@ -307,6 +307,92 @@ function initializeDb(db: Database.Database) {
       FOREIGN KEY (product_id) REFERENCES products(id)
     );
 
+    CREATE TABLE IF NOT EXISTS fiscal_years (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      start_date TEXT NOT NULL,
+      end_date TEXT NOT NULL,
+      is_closed INTEGER DEFAULT 0,
+      is_current INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS accounts (
+      id TEXT PRIMARY KEY,
+      code TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL,
+      type TEXT NOT NULL,
+      sub_type TEXT,
+      parent_id TEXT,
+      description TEXT,
+      is_system INTEGER DEFAULT 0,
+      is_active INTEGER DEFAULT 1,
+      opening_balance REAL DEFAULT 0,
+      opening_balance_type TEXT DEFAULT 'debit',
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (parent_id) REFERENCES accounts(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS journal_entries (
+      id TEXT PRIMARY KEY,
+      entry_code TEXT UNIQUE,
+      entry_date TEXT NOT NULL,
+      fiscal_year_id TEXT,
+      reference TEXT,
+      source_type TEXT,
+      source_id TEXT,
+      narration TEXT,
+      total_debit REAL DEFAULT 0,
+      total_credit REAL DEFAULT 0,
+      status TEXT DEFAULT 'draft',
+      reversed_by TEXT,
+      created_by TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (fiscal_year_id) REFERENCES fiscal_years(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS journal_entry_lines (
+      id TEXT PRIMARY KEY,
+      journal_entry_id TEXT NOT NULL,
+      account_id TEXT NOT NULL,
+      debit REAL DEFAULT 0,
+      credit REAL DEFAULT 0,
+      description TEXT,
+      sort_order INTEGER DEFAULT 0,
+      FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE,
+      FOREIGN KEY (account_id) REFERENCES accounts(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS tax_periods (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      start_date TEXT NOT NULL,
+      end_date TEXT NOT NULL,
+      status TEXT DEFAULT 'open',
+      filed_date TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS tds_entries (
+      id TEXT PRIMARY KEY,
+      bill_id TEXT,
+      supplier_id TEXT,
+      tds_rate REAL NOT NULL,
+      taxable_amount REAL NOT NULL,
+      tds_amount REAL NOT NULL,
+      pan_no TEXT,
+      tds_date TEXT NOT NULL,
+      deposited INTEGER DEFAULT 0,
+      deposit_date TEXT,
+      deposit_reference TEXT,
+      fiscal_year_id TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (bill_id) REFERENCES bills(id),
+      FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
+    );
+
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       username TEXT NOT NULL UNIQUE,
@@ -401,6 +487,61 @@ function initializeDb(db: Database.Database) {
     // Default admin user (password: admin123)
     db.prepare("INSERT INTO users (id, username, password, full_name, email, group_id, is_admin) VALUES (?, ?, ?, ?, ?, ?, 1)").run(uuid(), "admin", "admin123", "System Admin", "admin@company.com", adminGroupId);
     db.prepare("INSERT INTO users (id, username, password, full_name, email, group_id, is_admin) VALUES (?, ?, ?, ?, ?, ?, 0)").run(uuid(), "anish", "anish123", "Anish Balami", "anish@company.com", salesGroupId);
+  }
+
+  // Seed Chart of Accounts and Fiscal Year
+  const acctCount = db.prepare("SELECT COUNT(*) as c FROM accounts").get() as { c: number };
+  if (acctCount.c === 0) {
+    const { v4: uuid } = require("uuid");
+    // Fiscal Year (Nepal: mid-July to mid-July, using BS 2082/83)
+    db.prepare("INSERT INTO fiscal_years (id, name, start_date, end_date, is_current) VALUES (?, ?, ?, ?, 1)").run(uuid(), "FY 2082/83", "2025-07-17", "2026-07-16");
+
+    // Chart of Accounts — Nepal standard
+    const accts = [
+      // Assets (1xxx)
+      { code: "1000", name: "Cash", type: "asset", sub: "cash", sys: 1 },
+      { code: "1010", name: "Bank Account", type: "asset", sub: "bank", sys: 1 },
+      { code: "1020", name: "Petty Cash", type: "asset", sub: "cash", sys: 0 },
+      { code: "1100", name: "Accounts Receivable", type: "asset", sub: "accounts_receivable", sys: 1 },
+      { code: "1200", name: "Inventory", type: "asset", sub: "inventory", sys: 1 },
+      { code: "1300", name: "Prepaid Expenses", type: "asset", sub: "current_asset", sys: 0 },
+      { code: "1400", name: "VAT Receivable (Input)", type: "asset", sub: "current_asset", sys: 1 },
+      { code: "1500", name: "TDS Receivable", type: "asset", sub: "current_asset", sys: 0 },
+      { code: "1600", name: "Fixed Assets", type: "asset", sub: "fixed_asset", sys: 0 },
+      { code: "1610", name: "Accumulated Depreciation", type: "asset", sub: "fixed_asset", sys: 0 },
+      // Liabilities (2xxx)
+      { code: "2000", name: "Accounts Payable", type: "liability", sub: "accounts_payable", sys: 1 },
+      { code: "2100", name: "VAT Payable (Output)", type: "liability", sub: "current_liability", sys: 1 },
+      { code: "2200", name: "TDS Payable", type: "liability", sub: "current_liability", sys: 1 },
+      { code: "2300", name: "Salary Payable", type: "liability", sub: "current_liability", sys: 0 },
+      { code: "2400", name: "Loan Payable", type: "liability", sub: "long_term_liability", sys: 0 },
+      // Equity (3xxx)
+      { code: "3000", name: "Owner's Equity", type: "equity", sub: "equity", sys: 1 },
+      { code: "3100", name: "Retained Earnings", type: "equity", sub: "retained_earnings", sys: 1 },
+      { code: "3200", name: "Owner's Drawing", type: "equity", sub: "equity", sys: 0 },
+      // Revenue (4xxx)
+      { code: "4000", name: "Sales Revenue", type: "revenue", sub: "operating_revenue", sys: 1 },
+      { code: "4010", name: "Export Revenue", type: "revenue", sub: "operating_revenue", sys: 0 },
+      { code: "4100", name: "Sales Returns & Allowances", type: "revenue", sub: "contra_revenue", sys: 1 },
+      { code: "4200", name: "Discount Given", type: "revenue", sub: "contra_revenue", sys: 0 },
+      { code: "4500", name: "Other Income", type: "revenue", sub: "other_income", sys: 0 },
+      // Expenses (5xxx-6xxx)
+      { code: "5000", name: "Cost of Goods Sold", type: "expense", sub: "cost_of_goods_sold", sys: 1 },
+      { code: "5100", name: "Purchase Returns", type: "expense", sub: "contra_expense", sys: 1 },
+      { code: "6000", name: "Salary & Wages", type: "expense", sub: "operating_expense", sys: 0 },
+      { code: "6100", name: "Rent Expense", type: "expense", sub: "operating_expense", sys: 0 },
+      { code: "6200", name: "Utilities Expense", type: "expense", sub: "operating_expense", sys: 0 },
+      { code: "6300", name: "Office Supplies", type: "expense", sub: "operating_expense", sys: 0 },
+      { code: "6400", name: "Transportation Expense", type: "expense", sub: "operating_expense", sys: 0 },
+      { code: "6500", name: "Depreciation Expense", type: "expense", sub: "operating_expense", sys: 0 },
+      { code: "6600", name: "Insurance Expense", type: "expense", sub: "operating_expense", sys: 0 },
+      { code: "6700", name: "Repair & Maintenance", type: "expense", sub: "operating_expense", sys: 0 },
+      { code: "6800", name: "Bank Charges", type: "expense", sub: "operating_expense", sys: 0 },
+      { code: "6900", name: "Miscellaneous Expense", type: "expense", sub: "operating_expense", sys: 0 },
+    ];
+    for (const a of accts) {
+      db.prepare("INSERT INTO accounts (id, code, name, type, sub_type, is_system) VALUES (?, ?, ?, ?, ?, ?)").run(uuid(), a.code, a.name, a.type, a.sub, a.sys);
+    }
   }
 
   // Add new product columns if they don't exist
