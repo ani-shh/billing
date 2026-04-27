@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #1e293b;
+  --background: #f9fafb;
+  --foreground: #111827;
+  --primary: #0f766e;
+  --primary-light: #14b8a6;
+  --primary-dark: #0d5e58;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --muted: #6b7280;
 }
 
 @theme inline {
@@ -15,22 +21,28 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Refined scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 
 /* Toggle switch */
 .toggle-switch {
   position: relative;
   width: 44px;
   height: 24px;
-  background: #cbd5e1;
+  background: #d1d5db;
   border-radius: 12px;
   cursor: pointer;
   transition: background 0.2s;
 }
-.toggle-switch.active {
-  background: #0d9488;
-}
+.toggle-switch.active { background: var(--primary); }
 .toggle-switch::after {
   content: '';
   position: absolute;
@@ -41,98 +53,35 @@ body {
   background: white;
   border-radius: 50%;
   transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
-.toggle-switch.active::after {
-  transform: translateX(20px);
+.toggle-switch.active::after { transform: translateX(20px); }
+
+/* Table refinements */
+table { border-collapse: separate; border-spacing: 0; }
+thead th { font-weight: 500; letter-spacing: 0.025em; }
+tbody tr { transition: background-color 0.1s ease; }
+
+/* Focus ring for accessibility */
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 /* Print styles */
 @media print {
-  /* Hide sidebar, nav, action buttons, back links */
-  aside,
-  .no-print,
-  [data-no-print],
-  nav {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-  }
-
-  /* Remove sidebar margin and reset layout */
-  main,
-  .flex-1 {
-    margin-left: 0 !important;
-    padding: 20px !important;
-  }
-
-  .min-h-screen {
-    min-height: auto !important;
-  }
-
-  .ml-60 {
-    margin-left: 0 !important;
-  }
-
-  body {
-    background: white !important;
-    color: black !important;
-    font-size: 12px;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  /* Remove shadows and round corners for cleaner print */
-  .shadow-sm,
-  .rounded-xl,
-  .rounded-lg {
-    box-shadow: none !important;
-  }
-
-  /* Invoice print layout */
-  .print-invoice {
-    max-width: 100% !important;
-    padding: 0 !important;
-  }
-
-  .print-invoice > div {
-    page-break-inside: avoid;
-  }
-
-  /* Print-only header */
-  .print-header {
-    display: flex !important;
-    justify-content: space-between;
-    border-bottom: 3px solid #0d9488;
-    padding-bottom: 16px;
-    margin-bottom: 24px;
-  }
-
-  /* Clean table borders for print */
-  table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-  table th,
-  table td {
-    border: 1px solid #d1d5db;
-    padding: 8px 12px;
-  }
-  table thead {
-    background: #f1f5f9 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  /* Status badge colors in print */
-  .bg-green-100, .bg-blue-100, .bg-red-100, .bg-gray-100, .bg-amber-100,
-  .bg-teal-50, .bg-green-50, .bg-red-50, .bg-blue-50 {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  /* Hide browser URL footer etc */
-  @page {
-    margin: 15mm;
-  }
+  aside, .no-print, [data-no-print], nav { display: none !important; width: 0 !important; height: 0 !important; overflow: hidden !important; }
+  main, .flex-1 { margin-left: 0 !important; padding: 20px !important; }
+  .min-h-screen { min-height: auto !important; }
+  .ml-60, .ml-16 { margin-left: 0 !important; }
+  body { background: white !important; color: black !important; font-size: 12px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .shadow-sm, .shadow, .shadow-md, .rounded-xl, .rounded-lg { box-shadow: none !important; }
+  .print-invoice { max-width: 100% !important; padding: 0 !important; }
+  .print-invoice > div { page-break-inside: avoid; }
+  .print-header { display: flex !important; justify-content: space-between; border-bottom: 3px solid var(--primary); padding-bottom: 16px; margin-bottom: 24px; }
+  table { border-collapse: collapse; width: 100%; }
+  table th, table td { border: 1px solid #d1d5db; padding: 8px 12px; }
+  table thead { background: #f3f4f6 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bg-green-100, .bg-blue-100, .bg-red-100, .bg-gray-100, .bg-amber-100, .bg-teal-50, .bg-green-50, .bg-red-50, .bg-blue-50 { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @page { margin: 15mm; }
 }

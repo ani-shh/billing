@@ -126,17 +126,19 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
   };
 
   return (
-    <aside className={`fixed left-0 top-0 h-full bg-slate-800 text-white flex flex-col z-50 no-print transition-all duration-300 ${collapsed ? "w-16" : "w-60"}`}>
+    <aside className={`fixed left-0 top-0 h-full bg-gray-900 text-white flex flex-col z-50 no-print transition-all duration-200 ${collapsed ? "w-[60px]" : "w-[240px]"}`}>
       {/* Header */}
-      <div className="border-b border-slate-700 flex items-center justify-between">
-        <Link href="/" className={`flex items-center gap-2 ${collapsed ? "p-4 justify-center w-full" : "p-5 flex-1 min-w-0"}`}>
-          <svg className="w-7 h-7 text-teal-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
-          </svg>
+      <div className="border-b border-gray-800 flex items-center">
+        <Link href="/" className={`flex items-center gap-2.5 ${collapsed ? "p-3 justify-center w-full" : "px-4 py-4 flex-1 min-w-0"}`}>
+          <div className="w-8 h-8 rounded-lg bg-teal-700 flex items-center justify-center shrink-0">
+            <svg className="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
+            </svg>
+          </div>
           {!collapsed && (
             <div className="min-w-0">
-              <p className="text-sm font-bold text-teal-400 leading-tight truncate">{orgName}</p>
-              <p className="text-[10px] text-slate-400">Billing System</p>
+              <p className="text-[13px] font-semibold text-white leading-tight truncate">{orgName}</p>
+              <p className="text-[10px] text-gray-500 mt-0.5">Billing System</p>
             </div>
           )}
         </Link>
@@ -145,16 +147,16 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
       {/* Collapse toggle */}
       <button
         onClick={onToggle}
-        className="absolute -right-3 top-20 w-6 h-6 bg-slate-700 border border-slate-600 rounded-full flex items-center justify-center text-slate-300 hover:bg-slate-600 hover:text-white transition-colors z-10"
+        className="absolute -right-3 top-[72px] w-6 h-6 bg-gray-900 border border-gray-700 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:border-gray-500 transition-colors z-10 shadow-sm"
         title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
-        <svg className={`w-3.5 h-3.5 transition-transform ${collapsed ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        <svg className={`w-3 h-3 transition-transform duration-200 ${collapsed ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
         </svg>
       </button>
 
       {/* Nav */}
-      <nav className="flex-1 py-4 overflow-y-auto">
+      <nav className="flex-1 py-2 overflow-y-auto">
         {navItems.map((item) => {
           const hasChildren = item.children && item.children.length > 0;
           const isOpen = openSections[item.href] && !collapsed;
@@ -168,38 +170,34 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
                 <button
                   data-popover-trigger
                   onClick={() => {
-                    if (collapsed) {
-                      setOpenPopover(openPopover === item.href ? null : item.href);
-                    } else {
-                      toggleSection(item.href);
-                    }
+                    if (collapsed) { setOpenPopover(openPopover === item.href ? null : item.href); }
+                    else { toggleSection(item.href); }
                   }}
-                  className={`w-full flex items-center gap-3 px-5 py-3 text-sm transition-colors ${collapsed ? "justify-center px-0" : ""} ${
-                    isSectionActive ? "text-white" : "text-slate-300 hover:bg-slate-700 hover:text-white"
+                  className={`w-full flex items-center gap-2.5 px-4 py-2 text-[13px] transition-colors mx-auto ${collapsed ? "justify-center px-0 w-[60px]" : "w-full"} ${
+                    isSectionActive ? "text-white" : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
                   }`}
                 >
                   {item.icon}
                   {!collapsed && (
                     <>
-                      <span className="flex-1 text-left">{item.label}</span>
-                      <svg className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <span className="flex-1 text-left font-medium">{item.label}</span>
+                      <svg className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </>
                   )}
                 </button>
 
-                {/* Click-based popover when collapsed */}
+                {/* Collapsed popover */}
                 {collapsed && openPopover === item.href && (
-                  <div data-popover className="absolute left-full top-0 ml-2 z-50">
-                    <div className="bg-slate-900 text-white text-sm rounded-lg shadow-xl py-2 min-w-48 border border-slate-700">
-                      <p className="px-4 py-2 font-semibold text-teal-400 border-b border-slate-700">{item.label}</p>
+                  <div data-popover className="absolute left-full top-0 ml-1.5 z-50">
+                    <div className="bg-gray-900 text-white text-[13px] rounded-lg shadow-xl shadow-black/20 py-1.5 min-w-44 border border-gray-700">
+                      <p className="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">{item.label}</p>
                       {item.children!.map((child) => {
                         const childActive = pathname === child.href || (child.href !== item.href && pathname.startsWith(child.href));
                         return (
-                          <Link key={child.href} href={child.href}
-                            onClick={() => setOpenPopover(null)}
-                            className={`block px-4 py-2 hover:bg-slate-700 transition-colors ${childActive ? "text-teal-300 bg-slate-800" : "text-slate-300"}`}>
+                          <Link key={child.href} href={child.href} onClick={() => setOpenPopover(null)}
+                            className={`block px-3 py-1.5 transition-colors ${childActive ? "text-teal-400 bg-gray-800" : "text-gray-300 hover:bg-gray-800 hover:text-white"}`}>
                             {child.label}
                           </Link>
                         );
@@ -210,13 +208,15 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
 
                 {/* Expanded children */}
                 {isOpen && !collapsed && (
-                  <div className="ml-5 border-l border-slate-700">
+                  <div className="mt-0.5 mb-1">
                     {item.children!.map((child) => {
                       const childActive = pathname === child.href || (child.href !== item.href && pathname.startsWith(child.href));
                       return (
                         <Link key={child.href} href={child.href}
-                          className={`block pl-6 pr-5 py-2 text-sm transition-colors ${
-                            childActive ? "text-teal-300 bg-slate-700/50" : "text-slate-400 hover:text-white hover:bg-slate-700/30"
+                          className={`block pl-11 pr-4 py-1.5 text-[13px] transition-colors ${
+                            childActive
+                              ? "text-white bg-gray-800 font-medium"
+                              : "text-gray-500 hover:text-gray-300 hover:bg-gray-800/40"
                           }`}>
                           {child.label}
                         </Link>
@@ -231,15 +231,17 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
           return (
             <div key={item.href} className="relative group">
               <Link href={item.href}
-                className={`flex items-center gap-3 px-5 py-3 text-sm transition-colors ${collapsed ? "justify-center px-0" : ""} ${
-                  isActive ? "bg-teal-600 text-white border-r-3 border-teal-300" : "text-slate-300 hover:bg-slate-700 hover:text-white"
+                className={`flex items-center gap-2.5 px-4 py-2 text-[13px] transition-colors ${collapsed ? "justify-center px-0 w-[60px] mx-auto" : ""} ${
+                  isActive
+                    ? "text-white bg-teal-700/80 font-medium"
+                    : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
                 }`}>
                 {item.icon}
                 {!collapsed && item.label}
               </Link>
               {collapsed && (
-                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 hidden group-hover:block z-50">
-                  <div className="bg-slate-900 text-white text-xs rounded-lg shadow-xl px-3 py-1.5 whitespace-nowrap">{item.label}</div>
+                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-1.5 hidden group-hover:block z-50">
+                  <div className="bg-gray-900 text-white text-xs rounded-lg shadow-xl shadow-black/20 px-2.5 py-1.5 whitespace-nowrap border border-gray-700">{item.label}</div>
                 </div>
               )}
             </div>
@@ -248,39 +250,33 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
       </nav>
 
       {/* User & Logout */}
-      <div className="border-t border-slate-700">
+      <div className="border-t border-gray-800 mt-auto">
         {user && !collapsed && (
-          <div className="px-5 py-3 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-sm font-bold shrink-0">
+          <div className="px-4 py-3 flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-teal-700 flex items-center justify-center text-xs font-semibold shrink-0">
               {user.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-white truncate">{user}</p>
-              <p className="text-[10px] text-slate-400">Administrator</p>
+              <p className="text-[13px] font-medium text-white truncate">{user}</p>
+              <p className="text-[10px] text-gray-500">Administrator</p>
             </div>
           </div>
         )}
         {user && collapsed && (
           <div className="flex justify-center py-3">
-            <div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-sm font-bold">
+            <div className="w-8 h-8 rounded-lg bg-teal-700 flex items-center justify-center text-xs font-semibold">
               {user.charAt(0).toUpperCase()}
             </div>
           </div>
         )}
         <button onClick={handleLogout}
-          className={`w-full flex items-center gap-3 px-5 py-3 text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors ${collapsed ? "justify-center px-0" : ""}`}>
-          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-gray-500 hover:text-gray-300 hover:bg-gray-800/50 transition-colors ${collapsed ? "justify-center px-0" : ""}`}>
+          <svg className="w-4.5 h-4.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
           {!collapsed && "Log Out"}
         </button>
       </div>
-
-      {!collapsed && (
-        <div className="p-4 border-t border-slate-700 text-xs text-slate-400 text-center">
-          This Fiscal Year to Date
-        </div>
-      )}
     </aside>
   );
 }

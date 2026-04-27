@@ -39,7 +39,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-gray-50 print:block print:bg-white">
       <Sidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
-      <main className={`flex-1 p-8 transition-all duration-300 print:ml-0 print:p-0 ${sidebarCollapsed ? "ml-16" : "ml-60"}`}>
+      <main className={`flex-1 p-6 transition-all duration-200 print:ml-0 print:p-0 ${sidebarCollapsed ? "ml-[60px]" : "ml-[240px]"}`}>
         {children}
       </main>
     </div>
